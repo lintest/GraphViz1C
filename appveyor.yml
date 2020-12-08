@@ -76,16 +76,13 @@ for:
     cache: 1cv8t.7z
 
     after_build:
+      - appveyor PushArtifact AddIn.zip
       - ps: Set-Content -Path app_port.txt -Value ([uri] $env:APPVEYOR_API_URL).Port
       - ps: if (!(Test-Path 1cv8t.7z)) { Invoke-WebRequest -Uri $env:URL_1CV8T -OutFile 1cv8t.7z }
       - 7z x 1cv8t.7z
       - mkdir database
       - bin\1cv8t.exe CREATEINFOBASE File=%CD%/database
-#      - bin\1cv8t.exe DESIGNER /F %CD%/database /LoadConfigFromFiles %CD%/config /UpdateDBCfg
       - bin\1cv8t.exe DESIGNER /F %CD%/database /LoadExternalDataProcessorOrReportFromFiles Example.xml GraphViz1c.epf /Out example.log
-      - appveyor PushArtifact GraphViz1c.epf
-      - bin\1cv8ct.exe ENTERPRISE /F %CD%/database /C GraphViz1c.epf
-#      - ps: if (!(Test-Path success.txt)) { throw "Имеются ошибки" }
       - ps: Set-Content "AddIn.SHA256.txt" (get-filehash -Algorithm SHA256 "AddIn.zip").Hash
 
     artifacts:
