@@ -25,7 +25,7 @@
 		</Properties>
 		<ChildObjects>
 			<Form>Form</Form>
-			<Template>GraphViz1c</Template>
+			<Template>GraphViz1C</Template>
 		</ChildObjects>
 	</ExternalDataProcessor>
 </MetaDataObject>

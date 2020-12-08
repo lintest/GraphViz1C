@@ -1,4 +1,6 @@
 ﻿/GraphViz
+/build64W
+/build32W
 /build64Win
 /build32Win
 /build64Lin
@@ -6,14 +8,16 @@
 /build64
 /build32
 /build
-/tools
+/bin64
+/bin32
 /bin
 /.vc
 /.vs
 /.vscode
 /Autotest.log
+/AddIn.zip
 /Example/fileversion
-/Example/Templates/GraphViz1c/Ext/Template.bin
+/Example/Templates/GraphViz1C/Ext/Template.bin
 /Decompile.bat
 manifest.xml
 *.epf

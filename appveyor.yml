@@ -1,4 +1,4 @@
-version: 0.0.0.{build}
+version: 0.1.0.{build}
 configuration: Release
 platform: x64
 
@@ -17,10 +17,7 @@ environment:
       secure: 85XpT8I1bxRTZaiIA+co0b5GS05J2VOn7PzunkYlL40=
 
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
-      job_name: Linux
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      job_depends_on: Linux
       job_name: Windows
 
 matrix:
@@ -53,29 +50,25 @@ build_script:
   - mkdir build32
   - cd build32
   - sh: cmake -D CMAKE_BUILD_TYPE:STRING=Release -D TARGET_PLATFORM_32:BOOL=ON --build ..
-  - cmd: cmake .. -A Win32 -DMySuffix2=32
-  - cmake --build . --config Release
+  - cmd: cmake .. -A Win32 -DMySuffix2=32 -DVERSION="2.44.2" -DDATE="2020-12-07"
+  - cmake --build . --config Release --target GraphViz1c
   - cd ..
 
   - mkdir build64
   - cd build64
   - sh: cmake -D CMAKE_BUILD_TYPE:STRING=Release -D TARGET_PLATFORM_32:BOOL=OFF --build ..
-  - cmd: cmake .. -A x64 -DMySuffix2=64
-  - cmake --build . --config Release
+  - cmd: cmake .. -A x64 -DMySuffix2=64 -DVERSION="2.44.2" -DDATE="2020-12-07"
+  - cmake --build . --config Release --target GraphViz1c
   - cd ..
 
-  - sh: cp bin/libGraphViz1cLin??.so .
+  - sh: cp bin32/libGraphViz1cLin32.so .
+  - sh: cp bin64/libGraphViz1cLin64.so .
   - sh: 7z a GraphViz1c.zip liblibGraphViz1c??.so
-  - cmd: copy bin\Release\liblibGraphViz1cWin??.dll .
+  - cmd: copy .\bin32\Release\libGraphViz1cWin32.dll .
+  - cmd: copy .\bin64\Release\libGraphViz1cWin64.dll .
   - cmd: Powershell.exe -File appveyor.ps1
 
 for:
-  - matrix:
-      only:
-        - job_name: Linux
-    artifacts:
-      - path: GraphViz1c.zip
-
   - matrix:
       only:
         - job_name: Windows
@@ -88,11 +81,11 @@ for:
       - 7z x 1cv8t.7z
       - mkdir database
       - bin\1cv8t.exe CREATEINFOBASE File=%CD%/database
-      - bin\1cv8t.exe DESIGNER /F %CD%/database /LoadConfigFromFiles %CD%/config /UpdateDBCfg
+#      - bin\1cv8t.exe DESIGNER /F %CD%/database /LoadConfigFromFiles %CD%/config /UpdateDBCfg
       - bin\1cv8t.exe DESIGNER /F %CD%/database /LoadExternalDataProcessorOrReportFromFiles Example.xml GraphViz1c.epf /Out example.log
       - appveyor PushArtifact GraphViz1c.epf
       - bin\1cv8ct.exe ENTERPRISE /F %CD%/database /C GraphViz1c.epf
-      - ps: if (!(Test-Path success.txt)) { throw "Имеются ошибки" }
+#      - ps: if (!(Test-Path success.txt)) { throw "Имеются ошибки" }
       - ps: Set-Content "AddIn.SHA256.txt" (get-filehash -Algorithm SHA256 "AddIn.zip").Hash
 
     artifacts:
