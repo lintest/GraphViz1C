@@ -1,0 +1,442 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 16c1c08389648e46fb014be53ba1f522fe469450..29a9facd96fdeb79b52c5e966dd3f85fedee776f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,13 +4,16 @@ project (Graphviz)
+ include(FeatureSummary)
+ 
+ # =============================== Build options ================================
+-option(enable_ltdl     "Support on-demand plugin loading" ON)
++option(enable_ltdl     "Support on-demand plugin loading" OFF )
++option(with_expat      "Expat required for HTML-like labels" OFF )
+ option(with_digcola    "DIGCOLA features in neato layout engine" ON )
+ option(with_ipsepcola  "IPSEPCOLA features in neato layout engine (disabled by default - C++ portability issues)." OFF )
+ option(with_ortho      "ORTHO features in neato layout engine." ON )
+ option(with_sfdp       "sfdp layout engine." ON )
+ option(with_smyrna     "SMYRNA large graph viewer (disabled by default - experimental)" OFF)
+ 
++option(BUILD_SHARED_LIBS "Build shared library" ON)
++
+ if (enable_ltdl)
+         add_definitions(-DENABLE_LTDL)
+ endif (enable_ltdl)
+@@ -40,6 +43,12 @@ endif (with_smyrna)
+ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+ 
+ # ============================= Build dependencies =============================
++if (WIN32)
++    set(AWK_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/windows/dependencies/graphviz-build-utilities/awk.exe" CACHE PATH "AWK executable")
++    set(BISON_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/windows/dependencies/graphviz-build-utilities/winflexbison/win_bison.exe" CACHE PATH "Bison executable")
++    set(FLEX_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/windows/dependencies/graphviz-build-utilities/winflexbison/win_flex.exe" CACHE PATH "Flex executable")
++endif(WIN32)
++
+ find_package(AWK REQUIRED)
+ find_package(BISON REQUIRED)
+ find_package(FLEX REQUIRED)
+@@ -82,7 +91,11 @@ endif()
+ 
+ find_package(ANN)
+ find_package(Cairo)
+-find_package(EXPAT)
++
++if (with_expat)
++    find_package(EXPAT)
++endif()
++
+ find_package(GD)
+ find_package(LTDL)
+ find_package(PangoCairo)
+diff --git a/cmd/dot/CMakeLists.txt b/cmd/dot/CMakeLists.txt
+index 00a4a283bdcfd4ed2c8a88f6ebd466bb4da82a42..e8214ae13eb80b0f3ba571bf9efc1284e4adac1d 100644
+--- a/cmd/dot/CMakeLists.txt
++++ b/cmd/dot/CMakeLists.txt
+@@ -10,16 +10,29 @@ include_directories(
+     ${GRAPHVIZ_LIB_DIR}/pathplan
+ )
+ 
+-add_executable(dot
+-    # Source files
+-    dot.c
+-    no_builtins.c
+-)
+-
+-target_link_libraries(dot
+-    cgraph
+-    gvc
+-)
++if(BUILD_SHARED_LIBS)
++    add_executable(dot
++        # Source files
++        dot.c
++        no_builtins.c
++    )
++    
++    target_link_libraries(dot
++        cgraph
++        gvc
++    )
++else(BUILD_SHARED_LIBS)
++    add_executable(dot
++        # Source files
++        dot.c
++        dot_builtins.c
++    )
++    target_link_libraries(dot
++        gvplugin_core
++        gvplugin_dot_layout
++        gvplugin_neato_layout
++    )
++endif(BUILD_SHARED_LIBS)
+ 
+ # Installation location of executables
+ install(
+diff --git a/cmd/tools/CMakeLists.txt b/cmd/tools/CMakeLists.txt
+index 087bf15cf0d5d4bfbb2a4549cdddbea678976472..741619f6cf0c06f61b7490d14244515c02d1e0aa 100644
+--- a/cmd/tools/CMakeLists.txt
++++ b/cmd/tools/CMakeLists.txt
+@@ -266,35 +266,38 @@ tool_defaults(gvgen)
+ 
+ add_definitions(-DDEMAND_LOADING=0)
+ 
+-add_executable(gvpack
+-    # Source files
+-    gvpack.c
+-)
++if(BUILD_SHARED_LIBS)
++    add_executable(gvpack
++        # Source files
++        gvpack.c
++    )
+ 
+-target_include_directories(gvpack PRIVATE
+-    ${GRAPHVIZ_LIB_DIR}
+-    ${CMAKE_CURRENT_SOURCE_DIR}
+-    ${CMAKE_CURRENT_BINARY_DIR}
+-    ${GRAPHVIZ_LIB_DIR}/cdt
+-    ${GRAPHVIZ_LIB_DIR}/cgraph
+-    ${GRAPHVIZ_LIB_DIR}/common
+-    ${GRAPHVIZ_LIB_DIR}/gvc
+-    ${GRAPHVIZ_LIB_DIR}/pack
+-    ${GRAPHVIZ_LIB_DIR}/pathplan
+-    ${EXPAT_INCLUDE_DIRS}
+-    ${Getopt_INCLUDE_DIRS}
+-)
++    target_include_directories(gvpack PRIVATE
++        ${GRAPHVIZ_LIB_DIR}
++        ${CMAKE_CURRENT_SOURCE_DIR}
++        ${CMAKE_CURRENT_BINARY_DIR}
++        ${GRAPHVIZ_LIB_DIR}/cdt
++        ${GRAPHVIZ_LIB_DIR}/cgraph
++        ${GRAPHVIZ_LIB_DIR}/common
++        ${GRAPHVIZ_LIB_DIR}/gvc
++        ${GRAPHVIZ_LIB_DIR}/pack
++        ${GRAPHVIZ_LIB_DIR}/pathplan
++        ${EXPAT_INCLUDE_DIRS}
++        ${Getopt_INCLUDE_DIRS}
++    )
+ 
+-target_link_libraries(gvpack
+-    cdt
+-    cgraph
+-    gvc
+-    gvplugin_neato_layout
+-    ingraphs
+-)
++    target_link_libraries(gvpack
++        cdt
++        cgraph
++        gvc
++        gvplugin_neato_layout
++        ingraphs
++    )
+ 
+ tool_defaults(gvpack)
+ 
++endif(BUILD_SHARED_LIBS)
++
+ # =================================== gxl2gv ===================================
+ if(EXPAT_FOUND)
+ 
+diff --git a/lib/cdt/CMakeLists.txt b/lib/cdt/CMakeLists.txt
+index 159f9864afb6b9b387d7d3dd11a7bfac9df0de29..070f470ea8a73a70bac672cb8baa1a1b83aad35d 100644
+--- a/lib/cdt/CMakeLists.txt
++++ b/lib/cdt/CMakeLists.txt
+@@ -1,6 +1,8 @@
+-add_definitions(-DEXPORT_CDT)
++if(BUILD_SHARED_LIBS)
++    add_definitions(-DEXPORT_CDT)
++endif()    
+ 
+-add_library(cdt SHARED
++add_library(cdt
+     # Header files
+     cdt.h
+     dthdr.h
+diff --git a/lib/cdt/cdt.h b/lib/cdt/cdt.h
+index 7bafbc061c4212df7bf5ec2b253315088698bbed..78d5380e7f06c797f9592f2698f34c48d81a7a56 100644
+--- a/lib/cdt/cdt.h
++++ b/lib/cdt/cdt.h
+@@ -19,7 +19,7 @@ extern "C" {
+ #   ifdef EXPORT_CDT
+ #       define CDT_API __declspec(dllexport)
+ #   else
+-#       define CDT_API __declspec(dllimport)
++#       define CDT_API extern
+ #   endif
+ #else
+ #   define CDT_API extern
+diff --git a/lib/cgraph/CMakeLists.txt b/lib/cgraph/CMakeLists.txt
+index 4d188459b8538154de5a380eaaafe7b749521d46..797f2ca019350df501357a556173037953510b39 100644
+--- a/lib/cgraph/CMakeLists.txt
++++ b/lib/cgraph/CMakeLists.txt
+@@ -2,9 +2,13 @@ BISON_TARGET(Grammar grammar.y ${CMAKE_CURRENT_BINARY_DIR}/grammar.c)
+ FLEX_TARGET(Scan scan.l  ${CMAKE_CURRENT_BINARY_DIR}/scan.c)
+ ADD_FLEX_BISON_DEPENDENCY(Scan Grammar)
+ 
+-add_definitions(-DEXPORT_CGRAPH -DEXPORT_AGXBUF -DEXPORT_CGHDR -DYY_NO_UNISTD_H)
++if(BUILD_SHARED_LIBS)
++    add_definitions(-DEXPORT_CGRAPH -DEXPORT_AGXBUF -DEXPORT_CGHDR)
++endif()
+ 
+-add_library(cgraph SHARED
++add_definitions(-DYY_NO_UNISTD_H)
++
++add_library(cgraph
+     # Header files
+     agxbuf.h
+     cghdr.h
+diff --git a/lib/cgraph/agxbuf.h b/lib/cgraph/agxbuf.h
+index eeb12235bee6d5350f950d42ecef38c5128d22cc..c0659ed4a92aca4ff805d63a8acd4e86f7f6e13d 100644
+--- a/lib/cgraph/agxbuf.h
++++ b/lib/cgraph/agxbuf.h
+@@ -24,7 +24,7 @@ extern "C" {
+ #   ifdef EXPORT_AGXBUF
+ #       define AGXBUF_API __declspec(dllexport)
+ #   else
+-#       define AGXBUF_API __declspec(dllimport)
++#       define AGXBUF_API extern
+ #   endif
+ #else
+ #   define AGXBUF_API extern
+diff --git a/lib/cgraph/cghdr.h b/lib/cgraph/cghdr.h
+index 131efbadfd2a72daf9673b9e71b604cdabb79922..eb93a41b3ca675ede6445813ffd0b36a92b0b564 100644
+--- a/lib/cgraph/cghdr.h
++++ b/lib/cgraph/cghdr.h
+@@ -19,7 +19,7 @@
+ #   ifdef EXPORT_CGHDR
+ #       define CGHDR_API __declspec(dllexport)
+ #   else
+-#       define CGHDR_API __declspec(dllimport)
++#       define CGHDR_API extern
+ #   endif
+ #else
+ #   define CGHDR_API extern
+diff --git a/lib/cgraph/cgraph.h b/lib/cgraph/cgraph.h
+index 8ee2fc4498793d50aa25365b65098f486956b7cd..b9b4ea5097c9235850f0537faac422d44002bc62 100644
+--- a/lib/cgraph/cgraph.h
++++ b/lib/cgraph/cgraph.h
+@@ -25,7 +25,7 @@ extern "C" {
+ #   ifdef EXPORT_CGRAPH
+ #       define CGRAPH_API __declspec(dllexport)
+ #   else
+-#       define CGRAPH_API __declspec(dllimport)
++#       define CGRAPH_API extern
+ #   endif
+ #else
+ #   define CGRAPH_API extern
+diff --git a/lib/common/CMakeLists.txt b/lib/common/CMakeLists.txt
+index 2620f1867b7d51b26b021da21728148262f0be24..ca67f7724f518a3b4c0309d870ed952afe536a6e 100644
+--- a/lib/common/CMakeLists.txt
++++ b/lib/common/CMakeLists.txt
+@@ -1,6 +1,8 @@
+ BISON_TARGET(HTMLparse htmlparse.y ${CMAKE_CURRENT_BINARY_DIR}/htmlparse.c)
+ 
+-add_definitions(-DGVC_EXPORTS -D_BLD_gvc=1)
++if(BUILD_SHARED_LIBS)
++    add_definitions(-DGVC_EXPORTS -D_BLD_gvc=1)
++endif()    
+ 
+ # Generate colortbl.h from sources
+ add_custom_command(
+diff --git a/lib/common/utils.h b/lib/common/utils.h
+index 4177461a2d21f769990ceb7a7a7ea262d68c656d..99c5491bb5162a171a0261c06c594a28597b021f 100644
+--- a/lib/common/utils.h
++++ b/lib/common/utils.h
+@@ -21,7 +21,7 @@ extern "C" {
+ 
+ /*visual studio*/
+ #ifdef _WIN32
+-#ifndef GVC_EXPORTS
++#ifdef GVC_EXPORTS
+ #define extern __declspec(dllimport)
+ #endif
+ #endif
+diff --git a/lib/gvc/CMakeLists.txt b/lib/gvc/CMakeLists.txt
+index 1db89a0ab87a3cfd3b5f68fb341a20f67fbce08e..3405e1d1a0250f8d7da4c7cc512eab1e68fdb18e 100644
+--- a/lib/gvc/CMakeLists.txt
++++ b/lib/gvc/CMakeLists.txt
+@@ -1,6 +1,8 @@
+-add_definitions(-D_BLD_gvc=1 -DGVC_EXPORTS -DGVLIBDIR="${LIBRARY_INSTALL_DIR}/graphviz")
++if(BUILD_SHARED_LIBS)
++    add_definitions(-D_BLD_gvc=1 -DGVC_EXPORTS -DGVLIBDIR="${LIBRARY_INSTALL_DIR}/graphviz")
++endif()    
+ 
+-add_library(gvc SHARED
++add_library(gvc
+     # Header files
+     gvc.h
+     gvcext.h
+diff --git a/lib/gvc/gvc.h b/lib/gvc/gvc.h
+index 894683a2d35dc16a5dfd523984a991da31a76a0d..b0d93eb27b232dae0d3423e75b2512ed71458860 100644
+--- a/lib/gvc/gvc.h
++++ b/lib/gvc/gvc.h
+@@ -29,13 +29,12 @@ extern "C" {
+ 
+ /*visual studio*/
+ #ifdef _WIN32
+-#ifndef GVC_EXPORTS
+-#undef extern
+-#define extern __declspec(dllimport)
+-#endif
++#   ifdef GVC_EXPORTS
++#       define extern __declspec(dllimport)
++#   endif
+ #endif
+ /*end visual studio*/
+-	
++
+ #define LAYOUT_DONE(g) (agbindrec(g, "Agraphinfo_t", 0, TRUE) && GD_drawing(g))
+ 
+ /* misc */
+diff --git a/lib/pathplan/CMakeLists.txt b/lib/pathplan/CMakeLists.txt
+index 552d6243b387821f6398e9d1294c03b05da786b8..5ef7bb7f01cc5757818f04223a575123b82d32b5 100644
+--- a/lib/pathplan/CMakeLists.txt
++++ b/lib/pathplan/CMakeLists.txt
+@@ -1,6 +1,8 @@
+-add_definitions(-D_BLD_pathplan -DPATHPLAN_EXPORTS)
++if(BUILD_SHARED_LIBS)
++    add_definitions(-D_BLD_pathplan -DPATHPLAN_EXPORTS)
++endif()    
+ 
+-add_library(pathplan SHARED
++add_library(pathplan
+     # Header files
+     pathgeom.h
+     pathplan.h
+diff --git a/lib/pathplan/vis.h b/lib/pathplan/vis.h
+index 96022d3d41e9e9abd9b59dccd9f851b33b49822a..743d5126f5b0c557a76fb01a61bd1e244471cfc6 100644
+--- a/lib/pathplan/vis.h
++++ b/lib/pathplan/vis.h
+@@ -46,10 +46,12 @@ extern "C" {
+ 	/* this is computed from the above */
+ 	array2 vis;
+     };
++
++/*visual studio*/
+ #ifdef _WIN32
+-#ifndef PATHPLAN_EXPORTS
+-#define extern __declspec(dllimport)
+-#endif
++#	ifdef PATHPLAN_EXPORTS
++#		define extern __declspec(dllimport)
++#	endif
+ #endif
+ /*end visual studio*/
+ 
+diff --git a/lib/xdot/CMakeLists.txt b/lib/xdot/CMakeLists.txt
+index afd07939fa97c40a6126ed36ce05e41fbc36edd0..b9ac70023246f3b7b7ea4532cffafc98a039d30c 100644
+--- a/lib/xdot/CMakeLists.txt
++++ b/lib/xdot/CMakeLists.txt
+@@ -1,6 +1,8 @@
+-add_definitions(-DEXPORT_XDOT)
++if(BUILD_SHARED_LIBS)
++    add_definitions(-DEXPORT_XDOT)
++endif()    
+ 
+-add_library(xdot SHARED
++add_library(xdot
+     # Header files
+     xdot.h
+ 
+diff --git a/lib/xdot/xdot.h b/lib/xdot/xdot.h
+index fc9392e44c8aee429a3378757fecd7807609db87..3669b3864b635c555fac0ec2ce61d474369610a2 100644
+--- a/lib/xdot/xdot.h
++++ b/lib/xdot/xdot.h
+@@ -25,7 +25,7 @@ extern "C" {
+ #   ifdef EXPORT_XDOT
+ #       define XDOT_API __declspec(dllexport)
+ #   else
+-#       define XDOT_API __declspec(dllimport)
++#       define XDOT_API
+ #   endif
+ #else
+ #   define XDOT_API extern
+diff --git a/plugin/core/CMakeLists.txt b/plugin/core/CMakeLists.txt
+index 2f003e7791863b971e7bede8a124074095bf69de..324816ce8928bc2e40efbeff80770e28809432e6 100644
+--- a/plugin/core/CMakeLists.txt
++++ b/plugin/core/CMakeLists.txt
+@@ -6,7 +6,7 @@ add_custom_command(
+             ${CMAKE_CURRENT_SOURCE_DIR}/ps.txt > ${CMAKE_CURRENT_BINARY_DIR}/ps.h
+ )
+ 
+-add_library(gvplugin_core SHARED
++add_library(gvplugin_core
+     # Header files
+     ps.h
+ 
+diff --git a/plugin/dot_layout/CMakeLists.txt b/plugin/dot_layout/CMakeLists.txt
+index 5f6886bdecdf050e2f50d69aa7931d318345960c..009e215fe3eee7d18237b89400646b4e4ac44a40 100644
+--- a/plugin/dot_layout/CMakeLists.txt
++++ b/plugin/dot_layout/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-add_library(gvplugin_dot_layout SHARED
++add_library(gvplugin_dot_layout
+     # Source files
+ 	gvplugin_dot_layout.c
+ 	gvlayout_dot_layout.c
+diff --git a/plugin/gd/CMakeLists.txt b/plugin/gd/CMakeLists.txt
+index 0beeccd82d0f960f20204e87adf0b8ae9cde56ab..63b46827d4107b6c5657b9139367fa1f3a3681c2 100644
+--- a/plugin/gd/CMakeLists.txt
++++ b/plugin/gd/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ if (GD_FOUND)
+ 
+-add_library(gvplugin_gd SHARED
++add_library(gvplugin_gd
+     # Source files
+     gvdevice_gd.c
+     gvloadimage_gd.c
+diff --git a/plugin/gdiplus/CMakeLists.txt b/plugin/gdiplus/CMakeLists.txt
+index 58388d63b7a4ee2ccc488d5b3657f5cf2e213ed4..0851458dc2e3e1444e15c392b15b043b173d1209 100644
+--- a/plugin/gdiplus/CMakeLists.txt
++++ b/plugin/gdiplus/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ if (WIN32)
+ 
+-add_library(gvplugin_gdiplus SHARED
++add_library(gvplugin_gdiplus
+     # Header files
+     FileStream.h
+     gvplugin_gdiplus.h
+diff --git a/plugin/neato_layout/CMakeLists.txt b/plugin/neato_layout/CMakeLists.txt
+index 8e27c972174be956520ebaa7ee0dca07bcc9ec62..df3881b9659243a8f2a7435b16c48273336d8c96 100644
+--- a/plugin/neato_layout/CMakeLists.txt
++++ b/plugin/neato_layout/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-add_library(gvplugin_neato_layout SHARED
++add_library(gvplugin_neato_layout
+     # Source files
+ 	gvplugin_neato_layout.c
+ 	gvlayout_neato_layout.c
+diff --git a/plugin/pango/CMakeLists.txt b/plugin/pango/CMakeLists.txt
+index e2a4a3845e7683389bbff652336c3cb121a8b1b4..afbea203c318afe1da3c44fe3f95fefc700b134f 100644
+--- a/plugin/pango/CMakeLists.txt
++++ b/plugin/pango/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ if(Cairo_FOUND AND PangoCairo_FOUND)
+ 
+-add_library(gvplugin_pango SHARED
++add_library(gvplugin_pango
+     # Header files
+     gvgetfontlist.h
+     gvplugin_pango.h
