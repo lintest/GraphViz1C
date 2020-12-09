@@ -7,7 +7,6 @@ add_library(${TARGET} SHARED
 		src/AddInNative.def
 		src/AddInNative.h
 		src/AddInNative.rc
-		src/dot_builtins.c
 		src/GraphViz1C.cpp
 		src/GraphViz1C.h
 		src/stdafx.h)
@@ -89,9 +88,8 @@ add_dependencies(${TARGET}
 )
 
 target_link_libraries(${TARGET}
-	cgraph
-	gvc
 	gvplugin_core
 	gvplugin_dot_layout
 	gvplugin_neato_layout
+	gvplugin_gdiplus
 )

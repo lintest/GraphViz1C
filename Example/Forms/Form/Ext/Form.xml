@@ -1,16 +1,31 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Form xmlns="http://v8.1c.ru/8.3/xcf/logform" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:dcscor="http://v8.1c.ru/8.1/data-composition-system/core" xmlns:dcsset="http://v8.1c.ru/8.1/data-composition-system/settings" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.4">
+	<AutoTitle>false</AutoTitle>
 	<AutoCommandBar name="ФормаКоманднаяПанель" id="-1">
 		<ChildItems>
-			<Button name="ФормаСформировать" id="1">
+			<Button name="ФормаОткрытьФайл" id="15">
 				<Type>CommandBarButton</Type>
-				<CommandName>Form.Command.Сформировать</CommandName>
-				<ExtendedTooltip name="ФормаСформироватьРасширеннаяПодсказка" id="2"/>
+				<CommandName>Form.Command.ОткрытьФайл</CommandName>
+				<ExtendedTooltip name="ФормаОткрытьФайлРасширеннаяПодсказка" id="16"/>
+			</Button>
+			<Button name="ФормаСохранитьКак" id="13">
+				<Type>CommandBarButton</Type>
+				<CommandName>Form.Command.СохранитьКак</CommandName>
+				<Picture>
+					<xr:Ref>StdPicture.SaveFile</xr:Ref>
+					<xr:LoadTransparent>true</xr:LoadTransparent>
+				</Picture>
+				<ExtendedTooltip name="ФормаСохранитьКакРасширеннаяПодсказка" id="14"/>
 			</Button>
 			<Button name="ФормаЭкспортVisio" id="6">
 				<Type>CommandBarButton</Type>
 				<CommandName>Form.Command.ЭкспортVisio</CommandName>
 				<ExtendedTooltip name="ФормаЭкспортVisioРасширеннаяПодсказка" id="7"/>
+			</Button>
+			<Button name="ФормаДоступныеФорматы" id="11">
+				<Type>CommandBarButton</Type>
+				<CommandName>Form.Command.ДоступныеФорматы</CommandName>
+				<ExtendedTooltip name="ФормаДоступныеФорматыРасширеннаяПодсказка" id="12"/>
 			</Button>
 		</ChildItems>
 	</AutoCommandBar>
@@ -109,6 +124,57 @@
 				</v8:item>
 			</ToolTip>
 			<Action>ЭкспортVisio</Action>
+		</Command>
+		<Command name="ДоступныеФорматы" id="3">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Доступные форматы</v8:content>
+				</v8:item>
+			</Title>
+			<ToolTip>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Доступные форматы</v8:content>
+				</v8:item>
+			</ToolTip>
+			<Action>ДоступныеФорматы</Action>
+		</Command>
+		<Command name="СохранитьКак" id="4">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Сохранить как…</v8:content>
+				</v8:item>
+			</Title>
+			<ToolTip>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Сохранить как</v8:content>
+				</v8:item>
+			</ToolTip>
+			<Action>СохранитьКак</Action>
+			<Representation>TextPicture</Representation>
+		</Command>
+		<Command name="ОткрытьФайл" id="5">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Открыть файл</v8:content>
+				</v8:item>
+			</Title>
+			<ToolTip>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Открыть файл</v8:content>
+				</v8:item>
+			</ToolTip>
+			<Picture>
+				<xr:Ref>StdPicture.OpenFile</xr:Ref>
+				<xr:LoadTransparent>true</xr:LoadTransparent>
+			</Picture>
+			<Action>ОткрытьФайл</Action>
+			<Representation>TextPicture</Representation>
 		</Command>
 	</Commands>
 </Form>

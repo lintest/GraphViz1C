@@ -10,12 +10,12 @@ class GraphViz1C:
 {
 private:
     static std::stringbuf buffer;
-    static std::ostream errors;
     static std::vector<std::u16string> names;
     GraphViz1C();
 private:
-    void render(const std::string &text, const std::string& format, const std::string& layout);
+    void render(VH source, const std::string& format, const std::string& layout);
+    void formats(int64_t api = 3);
 public:
-    static void error(char* errMsg);
+    static std::ostream errors;
 };
 #endif //__GRAPHVIZ1C_H__
