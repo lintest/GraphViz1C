@@ -1,4 +1,4 @@
-version: 0.1.0.{build}
+version: 2.44.2.{build}
 configuration: Release
 platform: x64
 
@@ -34,44 +34,29 @@ install:
   - git submodule update --init
   - cd ..
 
-  - sh: sudo dpkg --add-architecture i386
-  - sh: sudo apt -qq update
-  - sh: sudo apt -qq -y install
-      uuid-dev uuid-dev:i386
-      libxrandr-dev libxrandr-dev:i386
-      libpng-dev libpng-dev:i386
-      gcc-multilib g++-multilib
-      bison flex
-
 init:
-  - cmd: cmake --version
-  - cmd: msbuild /version
-  - cmd: echo.
+  - cmake --version
+  - msbuild /version
+  - echo.
 
 build_script:
-  - sh: echo "#define VERSION_FULL " ${APPVEYOR_BUILD_VERSION} > "version.h"
-  - cmd: Powershell.exe -File manifest.ps1 -Project GraphViz1c -Version %APPVEYOR_BUILD_VERSION%
+  - Powershell.exe -File manifest.ps1 -Project GraphViz1c -Version %APPVEYOR_BUILD_VERSION%
 
   - mkdir build32
   - cd build32
-  - sh: cmake -D CMAKE_BUILD_TYPE:STRING=Release -D TARGET_PLATFORM_32:BOOL=ON --build ..
-  - cmd: cmake .. -A Win32 -DMySuffix2=32 -DVERSION="2.44.2" -DDATE="2020-12-07"
+  - cmake .. -A Win32 -DMySuffix2=32 -DVERSION="%APPVEYOR_BUILD_VERSION%" -DDATE="2020-12-07"
   - cmake --build . --config Release --target GraphViz1c
   - cd ..
 
   - mkdir build64
   - cd build64
-  - sh: cmake -D CMAKE_BUILD_TYPE:STRING=Release -D TARGET_PLATFORM_32:BOOL=OFF --build ..
-  - cmd: cmake .. -A x64 -DMySuffix2=64 -DVERSION="2.44.2" -DDATE="2020-12-07"
+  - cmake .. -A x64 -DMySuffix2=64 -DVERSION="%APPVEYOR_BUILD_VERSION%" -DDATE="2020-12-07"
   - cmake --build . --config Release --target GraphViz1c
   - cd ..
 
-  - sh: cp bin32/libGraphViz1cLin32.so .
-  - sh: cp bin64/libGraphViz1cLin64.so .
-  - sh: 7z a GraphViz1c.zip liblibGraphViz1c??.so
-  - cmd: copy .\bin32\Release\libGraphViz1cWin32.dll .
-  - cmd: copy .\bin64\Release\libGraphViz1cWin64.dll .
-  - cmd: Powershell.exe -File appveyor.ps1
+  - copy .\bin32\Release\libGraphViz1cWin32.dll .
+  - copy .\bin64\Release\libGraphViz1cWin64.dll .
+  - Powershell.exe -File appveyor.ps1
 
 for:
   - matrix:
