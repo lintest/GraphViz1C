@@ -24,7 +24,7 @@ matrix:
   fast_finish: true
 
 install:
-  - git clone -q --branch=master https://github.com/lintest/tools1c.git bin
+  - git clone -q --branch=platform https://github.com/lintest/tools1c.git bin
   - cd bin
   - 7z x tools1c.part01.rar -p%KEY_1CV8T%
   - cd ..
