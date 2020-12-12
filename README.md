@@ -105,3 +105,11 @@ plain, plain-ext, png, ps, ps2, svg, tif, tiff, tk, vml, xdot, xdot1.2, xdot1.4,
 	Сообщить("Доступные форматы: " + РезультатВызова);
 КонецПроцедуры
 ```
+
+## Сборка для Linux
+
+```bash
+sudo apt install -y autoconf libtool
+./autogen.sh
+./configure --prefix=${HOME}/usr --enable-static=yes --enable-ltdl=no --enable-swig=no --enable-tcl=no --enable-x=no --with-expat=no --with-visio=no --with-cgraph=no --with-fontconfig=no --disable-sharp --disable-guile --disable-io --disable-java  --disable-lua --disable-ocaml --disable-perl --disable-php  --disable-python --disable-ruby --disable-tcl --enable-shared=no  --with-gtk=no --with-poppler=no --with-gdk-pixbuf=no --with-fontconfig=no --with-gtkgl=no --with-gtkglext=no --with-ann=no --with-glade=no --with-qt=no -with-x=no
+```

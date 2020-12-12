@@ -40,7 +40,6 @@ init:
   - echo.
 
 build_script:
-  - Powershell.exe -File manifest.ps1 -Project GraphViz1c -Version %APPVEYOR_BUILD_VERSION%
 
   - mkdir build32
   - cd build32
@@ -56,7 +55,8 @@ build_script:
 
   - copy .\bin32\Release\libGraphViz1cWin32.dll .
   - copy .\bin64\Release\libGraphViz1cWin64.dll .
-  - Powershell.exe -File appveyor.ps1
+  - Powershell.exe -File manifest.ps1 -Project %APPVEYOR_PROJECT_NAME% -Version %APPVEYOR_BUILD_VERSION%
+  - Powershell.exe -File appveyor.ps1 -Project %APPVEYOR_PROJECT_NAME% -Account %APPVEYOR_ACCOUNT_NAME%
 
 for:
   - matrix:

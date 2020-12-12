@@ -1,6 +1,8 @@
-$account = "lintest"
-$project = "GraphViz1c"
-$name = "GraphViz1c"
+param(
+  [string]$account, 
+  [string]$project, 
+  [string]$name=$project
+)
 
 #https://ci.appveyor.com/api-keys
 $token = $env:API_TOKEN 
