@@ -5,6 +5,16 @@
 #include <gvc/gvio.h>
 #include <gvc/gvplugin.h>
 
+extern "C" {
+	extern char* gvplugin_list(GVC_t* gvc, api_t api, const char* str);
+	extern gvplugin_library_t gvplugin_dot_layout_LTX_library;
+	extern gvplugin_library_t gvplugin_neato_layout_LTX_library;
+	extern gvplugin_library_t gvplugin_core_LTX_library;
+	extern gvplugin_library_t gvplugin_gdiplus_LTX_library;
+    extern char *Gvfilepath;  /* Per-process path of files allowed in image attributes (also ps libs) */
+    extern char *Gvimagepath; /* Per-graph path of files allowed in image attributes  (also ps libs) */
+}
+
 #pragma comment(lib, "vcruntime.lib")
 
 std::vector<std::u16string> GraphViz1C::names = {
@@ -13,6 +23,13 @@ std::vector<std::u16string> GraphViz1C::names = {
 
 GraphViz1C::GraphViz1C()
 {
+	static std::string imagepath;
+
+	AddProperty(
+		u"ImagePath", u"ПутиКартинок",
+		[&](VH var) { var = imagepath; },
+		[&](VH var) { imagepath = var; Gvimagepath = (char*)imagepath.c_str(); }
+	);
 	AddFunction(u"Render", u"Сформировать",
 		[&](VH source, VH format, VH layout) { this->render(source, format, layout); },
 		{ { 1, u"svg"}, { 2, u"dot"  } }
@@ -83,14 +100,6 @@ void GraphViz1C::render(VH source, const std::string& format, const std::string&
 		result = buffer.str();
 		buffer.str({});
 	}
-}
-
-extern "C" {
-	extern char* gvplugin_list(GVC_t* gvc, api_t api, const char* str);
-	extern gvplugin_library_t gvplugin_dot_layout_LTX_library;
-	extern gvplugin_library_t gvplugin_neato_layout_LTX_library;
-	extern gvplugin_library_t gvplugin_core_LTX_library;
-	extern gvplugin_library_t gvplugin_gdiplus_LTX_library;
 }
 
 lt_symlist_t lt_preloaded_symbols[] = {
