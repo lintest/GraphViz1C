@@ -1,7 +1,7 @@
 param(
-  [string]$account, 
-  [string]$project, 
-  [string]$name=$project
+  [string]$account = $env:APPVEYOR_ACCOUNT_NAME,
+  [string]$project = $env:APPVEYOR_PROJECT_NAME,
+  [string]$name = $project
 )
 
 #https://ci.appveyor.com/api-keys

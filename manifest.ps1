@@ -1,9 +1,9 @@
 Param (
-    [string]$project,
-    [string]$version
+    [string]$project = $env:APPVEYOR_PROJECT_NAME,
+    [string]$version = $env:APPVEYOR_BUILD_VERSION
 )
 
-$postfix = '_' + $version -replace '\.','_'
+$postfix = '_' + $version -replace '\.','-'
 $v1,$v2,$v3,$v4 = $version.split('.')
 Set-Content 'version.h' "#define VER_FILENAME $project"
 Add-Content 'version.h' "#define VERSION_FULL $version"
@@ -33,6 +33,20 @@ $writer.WriteAttributeString('type', 'native')
 $writer.WriteAttributeString('os', 'Windows')
 $writer.WriteAttributeString('arch', 'x86_64')
 $writer.WriteAttributeString('path', "${project}Win64${postfix}.dll")
+$writer.WriteEndElement();
+
+$writer.WriteStartElement('component')
+$writer.WriteAttributeString('type', 'native')
+$writer.WriteAttributeString('os', 'Linux')
+$writer.WriteAttributeString('arch', 'i386')
+$writer.WriteAttributeString('path', "${project}Lin32${postfix}.so")
+$writer.WriteEndElement();
+
+$writer.WriteStartElement('component')
+$writer.WriteAttributeString('type', 'native')
+$writer.WriteAttributeString('os', 'Linux')
+$writer.WriteAttributeString('arch', 'x86_64')
+$writer.WriteAttributeString('path', "${project}Lin64${postfix}.so")
 $writer.WriteEndElement();
 
 $writer.WriteEndElement();
