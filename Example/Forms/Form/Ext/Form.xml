@@ -39,6 +39,9 @@
 			<TitleLocation>None</TitleLocation>
 			<ContextMenu name="ТекстHTMLКонтекстноеМеню" id="9"/>
 			<ExtendedTooltip name="ТекстHTMLРасширеннаяПодсказка" id="10"/>
+			<Events>
+				<Event name="DocumentComplete">ТекстHTMLДокументСформирован</Event>
+			</Events>
 		</HTMLDocumentField>
 	</ChildItems>
 	<Attributes>

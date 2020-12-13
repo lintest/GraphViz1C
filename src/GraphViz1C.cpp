@@ -28,7 +28,10 @@ GraphViz1C::GraphViz1C()
 	AddProperty(
 		u"ImagePath", u"ПутиКартинок",
 		[&](VH var) { var = imagepath; },
-		[&](VH var) { imagepath = var; Gvimagepath = (char*)imagepath.c_str(); }
+		[&](VH var) { imagepath = var; 
+			Gvfilepath = (char*)imagepath.c_str();
+			Gvimagepath = (char*)imagepath.c_str(); 
+		}
 	);
 	AddFunction(u"Render", u"Сформировать",
 		[&](VH source, VH format, VH layout) { this->render(source, format, layout); },
