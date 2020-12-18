@@ -34,6 +34,11 @@ install:
   - git submodule update --init
   - cd ..
 
+  - git clone -q --branch=master https://github.com/libexpat/libexpat.git Expat
+  - cd Expat
+  - git checkout -b version R_2_2_10
+  - cd ..
+
 init:
   - cmake --version
   - msbuild /version
