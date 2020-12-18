@@ -8,6 +8,7 @@ branches:
     - master
 
 skip_branch_with_pr: true
+skip_tags: true
 
 environment:
   global:
@@ -27,18 +28,36 @@ install:
   - git clone -q --branch=platform https://github.com/lintest/tools1c.git bin
   - cd bin
   - 7z x tools1c.part01.rar -p%KEY_1CV8T%
-  - cd ..
+  - cd %APPVEYOR_BUILD_FOLDER%
 
   - git clone -q --branch=master https://github.com/lintest/GraphViz.git GraphViz
   - cd GraphViz
   - git submodule update --init
-  - cd ..
+  - cd %APPVEYOR_BUILD_FOLDER%
 
   - git clone -q --branch=master https://github.com/libexpat/libexpat.git Expat
   - cd Expat
   - git checkout -b version R_2_2_10
+  - mkdir build32
+  - cd build32
+  - cmake ../expat -A Win32 -DEXPAT_MSVC_STATIC_CRT=ON -DEXPAT_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=../../GraphViz/windows/dependencies/libraries/x86/
+  - cmake --build . --config Release --target INSTALL
   - cd ..
+  - mkdir build64
+  - cd build64
+  - cmake ../expat -A x64 -DEXPAT_MSVC_STATIC_CRT=ON -DEXPAT_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=../../GraphViz/windows/dependencies/libraries/x64/
+  - cmake --build . --config Release --target INSTALL
+  - cd %APPVEYOR_BUILD_FOLDER%
 
+  - cd GraphViz/windows/dependencies/libraries/x86/lib
+  - del expat.lib
+  - ren libexpat*.lib expat.lib
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - cd GraphViz/windows/dependencies/libraries/x64/lib
+  - del expat.lib
+  - ren libexpat*.lib expat.lib
+  - cd %APPVEYOR_BUILD_FOLDER%
+  
 init:
   - cmake --version
   - msbuild /version
@@ -73,11 +92,9 @@ for:
       - mkdir database
       - bin\1cv8t.exe CREATEINFOBASE File=%CD%/database
       - bin\1cv8t.exe DESIGNER /F %CD%/database /LoadExternalDataProcessorOrReportFromFiles Example.xml GraphViz1c.epf /Out example.log
-      - ps: Set-Content "AddIn.SHA256.txt" (get-filehash -Algorithm SHA256 "AddIn.zip").Hash
 
     artifacts:
       - path: AddIn.zip
-      - path: AddIn.SHA256.txt
       - path: GraphViz1c.epf
       - path: autotest.log
       - path: example.log

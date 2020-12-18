@@ -68,10 +68,9 @@ else(UNIX)
 	target_compile_options(${TARGET} PRIVATE /utf-8)
 endif(UNIX)
 
+add_definitions(-DXML_STATIC)
+add_definitions(-DXML_BUILDING_EXPAT)
 set(GRAPHVIZ_LIB_DIR "${CMAKE_SOURCE_DIR}/GraphViz/lib")
-
-add_subdirectory(./Expat/expat)
-
 add_subdirectory(./GraphViz)
 
 include_directories(
@@ -95,9 +94,3 @@ target_link_libraries(${TARGET}
 	gvplugin_neato_layout
 	gvplugin_gdiplus
 )
-
-if (EXPAT_FOUND)
-	set(EXPAT_SHARED_LIBS 0)
-    set(HAVE_EXPAT ${EXPAT_FOUND})
-	target_link_libraries(${TARGET} expat)
-endif(EXPAT_FOUND)
