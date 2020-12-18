@@ -1,0 +1,22 @@
+digraph G {
+  node[fontname="Arial" shape="box" style="rounded,filled" fontcolor="white" width=3]
+  graph [nodesep=1 ranksep=0.5 splines=ortho]
+  Старт[label="" shape="circle" color="gray" width=0.5]
+  Открыто[color="deepskyblue4" group="g 0"]
+  Анализ[color="gold1" fontcolor="black" group="g1"]
+  Согласование[color="deepskyblue4"  group="g2"]
+  Разработка[color="gold1" fontcolor="black" group="g1"]
+  Тестирование[color="gold1" fontcolor="black" group="g1"]
+  Закрыто[color="darkgreen" group="g1"]
+  Ожидание[color="deepskyblue4" group="g0"]
+  Отклонено[color="firebrick"]
+  Старт -> Открыто
+  Анализ -> Разработка -> Тестирование -> Закрыто
+  Согласование -> Отклонено
+  Тестирование -> Ожидание -> Разработка
+  Согласование -> Разработка
+  {rank=same rankdir=RL Открыто Анализ Согласование}
+  {rank=same rankdir=RL Закрыто Отклонено}
+  {rank=same rankdir=RL Разработка Ожидание}
+  Открыто -> Анализ -> Согласование
+}

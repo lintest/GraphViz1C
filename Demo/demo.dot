@@ -1,0 +1,17 @@
+digraph {
+node[shape=none label=""]
+Корень[image="img/root.png"]
+Заказчик[image="img/businessman.png"]
+Команда[image="img/team.png"]
+Фрилансер[image="img/freelance.png"]
+Механик[image="img/mechanic.png"]
+Программист[image="img/programmer.png"]
+Секретарь[image="img/secretary.png"]
+Сервер[image="img/server.png"]
+Техник[image="img/technician.png"]
+Заказчик -> Команда -> Программист [penwidth=2 color="darkgreen"]
+Команда -> Секретарь  [penwidth=2 color="darkgreen"]
+Команда -> Фрилансер  [penwidth=2 color="darkgreen"]
+Механик -> Сервер  [penwidth=2 color="darkgreen"]
+Техник -> Сервер  [penwidth=2 color="darkgreen"]
+}
