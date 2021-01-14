@@ -66,6 +66,17 @@ else(UNIX)
 	target_compile_definitions(${TARGET} PRIVATE _WINDOWS
 			_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 	target_compile_options(${TARGET} PRIVATE /utf-8)
+	set(CompilerFlags
+			CMAKE_CXX_FLAGS
+			CMAKE_CXX_FLAGS_DEBUG
+			CMAKE_CXX_FLAGS_RELEASE
+			CMAKE_C_FLAGS
+			CMAKE_C_FLAGS_DEBUG
+			CMAKE_C_FLAGS_RELEASE
+			)	
+	foreach(CompilerFlag ${CompilerFlags})
+		string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+	endforeach()	
 endif(UNIX)
 
 add_definitions(-DXML_STATIC)
